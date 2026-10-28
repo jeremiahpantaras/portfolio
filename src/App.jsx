@@ -1,56 +1,46 @@
-import { useState, useEffect } from 'react';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+import SiteLayout from './components/layout/SiteLayout';
+import ScrollToTop from './components/layout/ScrollToTop';
+import Preloader from './components/layout/Preloader';
 import Home from './pages/Home';
-import About from './pages/About';
-import TechStacks from './pages/TechStacks';
-import Projects from './pages/Projects';
-import Certifications from './pages/Certifications';
-import Experience from './pages/Experience';
-import Workshop from './pages/Workshop';
-import Gallery from './pages/Gallery';
-import CreativeHome from './creatives/pages/CreativeHome';
-import CreativeGalleryPage from './creatives/pages/CreativeGalleryPage';
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/react"
+import { routeLoaders, notFoundLoader } from './routes';
 
+// Every route except the home page is code-split (loaders live in routes.js so they can also be prefetched).
+const TechStacks = lazy(routeLoaders['/tech-stacks']);
+const Projects = lazy(routeLoaders['/projects']);
+const Certifications = lazy(routeLoaders['/certifications']);
+const Experience = lazy(routeLoaders['/experience']);
+const Workshop = lazy(routeLoaders['/workshops']);
+const NotFound = lazy(notFoundLoader);
+const CreativeHome = lazy(routeLoaders['/creative']);
+const CreativeGalleryPage = lazy(routeLoaders['/creative/gallery']);
+
+// The site is dark-only (see index.html and src/index.css); there is no theme state to manage here.
 function App() {
-  const [darkMode, setDarkMode] = useState(true);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-      document.body.classList.remove('light');
-    } else {
-      setDarkMode(false);
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-      document.body.classList.add('light');
-    }
-  }, []);
-
-  // Pass darkMode and setDarkMode as props if you want to toggle from any page
   return (
     <Router>
-      <div className="min-h-screen">
+      <ScrollToTop />
+      <Preloader />
+      <Suspense fallback={<div className="min-h-[100svh]" aria-busy="true" />}>
         <Routes>
-          <Route path="/" element={<Home darkMode={darkMode} setDarkMode={setDarkMode} />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/tech-stacks" element={<TechStacks />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/certifications" element={<Certifications />} />
-          <Route path="/experience" element={<Experience />} />
-          <Route path="/workshops" element={<Workshop />} />
-          <Route path="/gallery" element={<Gallery />} />
+          <Route element={<SiteLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/tech-stacks" element={<TechStacks />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/certifications" element={<Certifications />} />
+            <Route path="/experience" element={<Experience />} />
+            <Route path="/workshops" element={<Workshop />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
           <Route path="/creative" element={<CreativeHome />} />
           <Route path="/creative/gallery" element={<CreativeGalleryPage />} />
         </Routes>
-        <Analytics />
-        <SpeedInsights />
-      </div>
+      </Suspense>
+      <Analytics />
+      <SpeedInsights />
     </Router>
   );
 }

@@ -1,84 +1,76 @@
-import { X, Download } from 'lucide-react';
-import { useEffect } from 'react';
+import { useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Download, X } from 'lucide-react';
+import useFocusTrap from '../hooks/useFocusTrap';
+import useScrollLock from '../hooks/useScrollLock';
 
-export default function ImageModal({ image, title, isOpen, onClose }) {
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      window.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
+// Image lightbox. `image` is the optimised display file; "Download Photo" saves `downloadSrc`
+// (the untouched original) when one is provided, so downloads keep their full quality.
+export default function ImageModal({ image, alt = '', downloadSrc, isOpen, onClose }) {
+  const dialogRef = useRef(null);
+  const open = isOpen && !!image;
+  useScrollLock(open);
+  useFocusTrap(dialogRef, open, onClose);
 
-  if (!isOpen || !image) return null;
+  if (!open) return null;
 
-  const handleDownload = async (e) => {
-    e.stopPropagation();
+  const source = downloadSrc ?? image;
+  const filename = decodeURIComponent(source.split('/').pop() || 'download');
+
+  const triggerDownload = (href, newTab) => {
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = filename;
+    if (newTab) a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleDownload = async () => {
     try {
-      const response = await fetch(image);
+      const response = await fetch(source);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = image.split('/').pop() || 'download';
-      document.body.appendChild(a);
-      a.click();
+      triggerDownload(url, false);
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      const a = document.createElement('a');
-      a.href = image;
-      a.download = image.split('/').pop() || 'download';
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    } catch {
+      triggerDownload(source, true);
     }
   };
 
-  const modalContent = (
-    <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-black/90 backdrop-blur-md"
-      onClick={onClose}
+  // Portalled to <body> so no transformed ancestor (GSAP reveals) can trap the fixed overlay.
+  return createPortal(
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={alt || 'Image preview'}
+      tabIndex={-1}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 outline-none sm:p-8"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      {/* Fixed Close Button for consistent positioning across all devices */}
-      <button 
+      <button
+        type="button"
         onClick={onClose}
-        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-[110] p-2 bg-black/40 rounded-full text-white/70 hover:text-white hover:bg-black/80 transition-all cursor-pointer border border-white/10"
-        aria-label="Close modal"
+        aria-label="Close image preview"
+        className="fixed right-3 top-3 z-[110] inline-flex h-9 w-9 pointer-coarse:h-11 pointer-coarse:w-11 items-center justify-center border border-line-strong bg-ink-900 text-fg-muted transition-colors hover:text-fg sm:right-6 sm:top-6"
       >
-        <X size={28} />
+        <X size={22} aria-hidden="true" />
       </button>
 
-      <div 
-        className="relative w-full max-w-6xl h-full flex flex-col items-center justify-center gap-6"
-        onClick={e => e.stopPropagation()}
-      >
-        <img 
-          src={image} 
-          alt={title} 
-          className="max-w-full max-h-[75vh] md:max-h-[85vh] object-contain shadow-2xl drop-shadow-2xl"
-        />
-        
+      <div className="flex h-full w-full max-w-6xl flex-col items-center justify-center gap-5">
+        <img src={image} alt={alt} className="max-h-[78vh] max-w-full object-contain md:max-h-[84vh]" />
         <button
+          type="button"
           onClick={handleDownload}
-          className="flex items-center gap-2 px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all duration-300 shadow-lg cursor-pointer rounded-full backdrop-blur-sm"
+          className="inline-flex min-h-9 pointer-coarse:min-h-11 items-center gap-2 border border-line-strong px-4 text-small text-fg transition-colors duration-200 hover:border-fg"
         >
-          <Download size={18} />
-          <span className="font-medium text-sm">Download Photo</span>
+          <Download size={16} aria-hidden="true" />
+          Download Photo
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
-
-  // Render the modal directly into document.body to escape GSAP wrapper transforms and filters
-  return createPortal(modalContent, document.body);
 }

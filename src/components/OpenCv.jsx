@@ -1,84 +1,61 @@
-import { X, Download, Printer } from 'lucide-react';
-import { useEffect } from 'react';
+import { useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { Download, X } from 'lucide-react';
+import { profile } from '../data/profile';
+import useFocusTrap from '../hooks/useFocusTrap';
+import useScrollLock from '../hooks/useScrollLock';
 
-const OpenCv = ({ isOpen, onClose }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    
-    const handleEsc = (event) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleEsc);
-
-    return () => {
-      document.body.style.overflow = 'auto';
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [isOpen, onClose]);
+// CV viewer. The PDF is the existing /Resume.pdf (unchanged); some mobile browsers only preview the first
+// page of an embedded PDF, so an "Open in new tab" link is always offered next to Download.
+export default function OpenCv({ isOpen, onClose }) {
+  const dialogRef = useRef(null);
+  useScrollLock(isOpen);
+  useFocusTrap(dialogRef, isOpen, onClose);
 
   if (!isOpen) return null;
 
-  const cvPath = '/Resume.pdf'; 
+  const { path, downloadName } = profile.cv;
+  const actionCls =
+    'inline-flex min-h-9 pointer-coarse:min-h-11 items-center gap-2 border border-line-strong px-4 text-small text-fg transition-colors duration-200 hover:border-fg focus-visible:border-fg';
 
-  const handlePrint = () => {
-    const iframe = document.getElementById('cv-iframe');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
-    }
-  };
-
-  return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm cursor-pointer" 
-      onClick={onClose}
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-3 sm:p-6"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="relative w-11/12 max-w-4xl h-5/6 bg-white dark:bg-[#1a1a1a] shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700"
-        onClick={(e) => e.stopPropagation()}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cv-title"
+        tabIndex={-1}
+        className="flex h-[88vh] w-full max-w-4xl flex-col border border-line-strong bg-ink-850 outline-none"
       >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-3 sm:p-4">
+          <h2 id="cv-title" className="text-heading text-fg">
             Curriculum Vitae
           </h2>
           <div className="flex items-center gap-2">
-            <a
-              href={cvPath}
-              download="Jeremiah-Pantaras-CV.pdf"
-              className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-[#2a2a2a] border border-transparent hover:bg-gray-200 dark:hover:bg-[#333] transition-all duration-300 text-xs font-medium text-gray-900 dark:text-white"
-            >
-              <Download size={16} />
-              <span>Download</span>
+            <a href={path} download={downloadName} className={actionCls}>
+              <Download size={16} aria-hidden="true" />
+              Download
+            </a>
+            <a href={path} target="_blank" rel="noopener noreferrer" className={`${actionCls} hidden sm:inline-flex`}>
+              Open in new tab
             </a>
             <button
+              type="button"
               onClick={onClose}
-              className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors cursor-pointer"
               aria-label="Close CV preview"
+              className="inline-flex h-9 w-9 pointer-coarse:h-11 pointer-coarse:w-11 items-center justify-center text-fg-muted transition-colors hover:text-fg"
             >
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
           </div>
         </div>
-
-        {/* PDF Preview */}
-        <div className="flex-1 bg-gray-50 dark:bg-gray-900">
-          <iframe
-            id="cv-iframe"
-            src={`${cvPath}#view=Fit`}
-            title="Jeremiah Pantaras CV"
-            className="w-full h-full border-none"
-          />
-        </div>
+        <iframe title="Jeremiah Pantaras CV" src={`${path}#view=Fit`} className="w-full flex-1 border-0 bg-ink-900" />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
-};
-
-export default OpenCv;
+}

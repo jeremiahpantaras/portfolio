@@ -1,93 +1,45 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import SkeletonLoader from '../components/SkeletonLoader';
-import { Award, ChevronLeft } from 'lucide-react';
+import PageShell from '../components/layout/PageShell';
+import TextLink from '../components/ui/TextLink';
+import { certifications, conference } from '../data/recognition';
 
 export default function Certifications() {
-  const [loading, setLoading] = useState(true);
-  const [isVisible, setIsVisible] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-      setTimeout(() => setIsVisible(true), 50);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const certifications = [
-    {
-      title: 'ICT Olympics Web Design and Development Champion',
-      issuer: 'STIWNU-CICT',
-      year: '2022',
-      badge: '🏆'
-    },
-    {
-      title: 'ICT Olympics Web Design and Development 3rd Placer',
-      issuer: 'STIWNU-CICT',
-      year: '2023',
-      badge: '🏆'
-    },
-    {
-      title: 'Philippine Institute of Cyber Security Professionals Inc.',
-      issuer: 'PICSPRO Inc.',
-      year: '2023',
-      badge: '🎖️'
-    }
-  ];
-
-  if (loading) return <SkeletonLoader />;
-
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] transition-colors duration-300 py-12">
-      <div className={`max-w-3xl mx-auto px-4 transition-all duration-700 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}>
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="mb-8 flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] transition-all duration-300 hover:scale-105 text-gray-900 dark:text-white font-medium cursor-pointer"
-        >
-          <ChevronLeft size={18} />
-          Back
-        </button>
-        {/* Certifications Card */}
-        <div className="bg-white dark:bg-[#1a1a1a] shadow-lg dark:shadow-2xl p-8 border border-gray-100 dark:border-gray-800 transition-all duration-300 hover:shadow-xl dark:hover:shadow-2xl">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-gray-100 dark:bg-[#2a2a2a] ">
-              <Award size={20} className="text-gray-700 dark:text-gray-300" />
+    <PageShell
+      label="Index — Recognition"
+      title="Certifications"
+      meta={{
+        title: 'Certifications | Jeremiah Pantaras',
+        description:
+          'Awards, certifications and conference presentations by Jeremiah Pantaras, including ICT Olympics Web Design and Development.',
+        path: '/certifications',
+      }}
+    >
+      <ol>
+        {certifications.map((cert, i) => (
+          <li key={cert.title} data-reveal="row" className="grid gap-2 border-t border-line py-5 md:grid-cols-12 md:gap-8">
+            <p className="eyebrow text-fg-subtle md:col-span-2">
+              {String(i + 1).padStart(2, '0')} · {cert.year}
+            </p>
+            <div className="md:col-span-10">
+              <h2 className="text-heading text-fg">{cert.title}</h2>
+              <p className="mt-1 text-fg-muted">{cert.issuer}</p>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Certifications</h1>
+          </li>
+        ))}
+        <li data-reveal="row" className="grid gap-2 border-t border-line py-5 md:grid-cols-12 md:gap-8">
+          <p className="eyebrow text-fg-subtle md:col-span-2">
+            {String(certifications.length + 1).padStart(2, '0')} · {conference.year}
+          </p>
+          <div className="md:col-span-10">
+            <h2 className="text-heading text-fg">{conference.title}</h2>
+            <p className="mt-1 text-fg-muted">{conference.place}</p>
+            <p className="mt-3 text-small">
+              <TextLink href={conference.url}>Conference schedule</TextLink>
+            </p>
           </div>
-          <div className="space-y-4">
-            {certifications.map((cert, index) => (
-              <div
-                key={index}
-                className={`p-4 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-700 hover:border-slate-500 dark:hover:border-slate-400 transition-all duration-500 hover:scale-[1.02] hover:shadow-lg ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl transition-transform duration-300 hover:scale-125">{cert.badge}</span>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-1 text-sm">
-                      {cert.title}
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {cert.issuer}
-                    </p>
-                    <span className="text-xs px-2 py-1 bg-gray-200 dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 mt-2 inline-block transition-all duration-300 hover:scale-105">
-                      {cert.year}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+        </li>
+      </ol>
+      <div className="border-t border-line" />
+    </PageShell>
   );
 }

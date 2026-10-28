@@ -8,38 +8,33 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- Non-blocking font stylesheet (display=swap paints text immediately with the fallback font) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..900&family=Geist+Mono:wght@400..600&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..900&family=Geist+Mono:wght@400..600&display=swap" /></noscript>
     
     <!-- Primary Meta Tags -->
     <title>Jeremiah Pantaras | Software Engineer & Full-Stack Developer</title>
     <meta name="title" content="Jeremiah Pantaras | Software Engineer & Full-Stack Developer" />
-    <meta name="description" content="Experienced Software Engineer specializing in Python Django, React, and modern web development. Founder & CEO of COS Devs, building innovative solutions for startups and MSMEs in the Philippines." />
-    <meta name="keywords" content="Jeremiah Pantaras, Software Engineer, Full-Stack Developer, Python Developer, Django Developer, React Developer, Web Development, COS Devs, Bacolod Developer, Philippine Developer, Portfolio, Tech Stack, AI Integration" />
+    <meta name="description" content="Experienced Software Engineer specializing in Python Django, React, and modern web development. Founder & CEO of Elpisoft, building innovative solutions for startups and MSMEs in the Philippines." />
+    <meta name="keywords" content="Jeremiah Pantaras, Software Engineer, Full-Stack Developer, Python Developer, Django Developer, React Developer, Web Development, Elpisoft, Bacolod Developer, Philippine Developer, Portfolio, Tech Stack, AI Integration" />
     <meta name="author" content="Jeremiah Pantaras" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <meta name="revisit-after" content="7 days" />
     <link rel="canonical" href="https://jeremiah.cosedevs.com/" />
-    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="theme-color" content="#0a0a0b" />
+    <meta name="color-scheme" content="dark" />
 
-    <!-- Theme Initialization Script -->
+    <!-- The site is dark-only. The `js` class lets CSS hide not-yet-revealed content only when scripts run. -->
     <script>
-      (function() {
-        const theme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (theme === 'dark' || (!theme && prefersDark)) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      })();
+      document.documentElement.classList.add('dark', 'js');
     </script>
-    
+
     <!-- Open Graph / Facebook Meta Tags -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://jeremiah.cosedevs.com/" />
     <meta property="og:title" content="Jeremiah Pantaras | Software Engineer & Full-Stack Developer" />
-    <meta property="og:description" content="Experienced Software Engineer specializing in Python Django, React, and modern web development. Founder & CEO of COS Devs, building innovative solutions for startups and MSMEs." />
+    <meta property="og:description" content="Experienced Software Engineer specializing in Python Django, React, and modern web development. Founder & CEO of Elpisoft, building innovative solutions for startups and MSMEs." />
     <meta property="og:image" content="https://jeremiah.cosedevs.com/portfolioThumbnail.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
@@ -53,7 +48,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://jeremiah.cosedevs.com/" />
     <meta name="twitter:title" content="Jeremiah Pantaras | Software Engineer & Full-Stack Developer" />
-    <meta name="twitter:description" content="Experienced Software Engineer specializing in Python Django, React, and modern web development. Founder & CEO of COS Devs." />
+    <meta name="twitter:description" content="Experienced Software Engineer specializing in Python Django, React, and modern web development. Founder & CEO of Elpisoft." />
     <meta name="twitter:image" content="https://jeremiah.cosedevs.com/portfolioThumbnail.png" />
     <meta name="twitter:image:alt" content="Jeremiah Pantaras - Software Engineer Portfolio" />
     <meta name="twitter:creator" content="@jeremiahpantaras" />
@@ -75,7 +70,8 @@
       "jobTitle": "Software Engineer",
       "worksFor": {
         "@type": "Organization",
-        "name": "COS Devs"
+        "name": "Elpisoft",
+        "url": "https://www.elpisoft.com/"
       },
       "address": {
         "@type": "PostalAddress",
@@ -89,7 +85,7 @@
         "https://www.linkedin.com/in/jeremiah-pantaras-47092b368/",
         "https://www.facebook.com/https.poypoymignon",
         "https://www.instagram.com/jeremiahpantaras/",
-        "https://cosdevsph.vercel.app/"
+        "https://www.elpisoft.com/"
       ],
       "knowsAbout": ["Python", "Django", "React", "JavaScript", "TypeScript", "Full-Stack Development", "Web Development", "AI Integration"],
       "alumniOf": "STI West Negros University"
@@ -107,7 +103,11 @@
     <script>
       (function() {
         'use strict';
-        
+
+        // Keep the console usable while developing / previewing locally.
+        var host = location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host.slice(-6) === '.local') return;
+
         // Disable right-click
         //document.addEventListener('contextmenu', function(e) {
         //  e.preventDefault();
